@@ -12,4 +12,7 @@ public class InvitationOut {
 
     private Integer id;
     private String status;
+
+//    private GameSessionOut gameSession;
+//    private Set<PlayerOut> players;
 }
