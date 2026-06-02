@@ -25,12 +25,12 @@ public class CaseController {
     public ResponseEntity<?> getPublishedCases() {
         return ResponseEntity.ok(caseService.getPublishedCases());
     }
-    @PostMapping("“add/{adminId}")
-    public ResponseEntity<?> addCase(@PathVariable Integer adminId, @RequestBody @Valid CaseIn dto) {
-        caseService.addCase(adminId, dto);
-        return ResponseEntity.status(200).body(new ApiResponse("Case added successfully"));
-
-    }
+//    @PostMapping("“add/{adminId}")
+//    public ResponseEntity<?> addCase(@PathVariable Integer adminId, @RequestBody @Valid CaseIn dto) {
+//        caseService.addCase(adminId, dto);
+//        return ResponseEntity.status(200).body(new ApiResponse("Case added successfully"));
+//
+//    }
 
     @PutMapping("update/{id}")
     public ResponseEntity<?> updateCase(@PathVariable Integer id, @RequestBody @Valid CaseIn dto) {
@@ -43,6 +43,7 @@ public class CaseController {
         caseService.deleteCase(id);
         return ResponseEntity.ok(new ApiResponse("Case deleted successfully"));
     }
+    //سبب اختياره  لان نعدل على الستاتس
     @PatchMapping("/publish/{id}")
     public ResponseEntity<?> publishCase(@PathVariable Integer id) {
         caseService.publishCase(id);

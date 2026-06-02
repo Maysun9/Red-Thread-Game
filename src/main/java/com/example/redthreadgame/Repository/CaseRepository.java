@@ -14,6 +14,6 @@ public interface CaseRepository extends JpaRepository<Case, Integer> {
     List<Case> findCasesByStatus(String status);
 
 
-    List<Case> findCasesByAdminId(Integer adminId);
+   // List<Case> findCasesByAdminId(Integer adminId);
 
 }
