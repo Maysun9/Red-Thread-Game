@@ -32,21 +32,21 @@ public class NoteService {
 //    public List<NoteOut> getNotesByGameSession(Integer gameSessionId) {
 //        List<NoteOut> notes = new ArrayList<>();
 //
-//        for (NoteModel n : noteRepository.findAllByGameSessionId(gameSessionId)) {
+//        for (Note n : noteRepository.findAllByGameSessionId(gameSessionId)) {
 //            notes.add(modelMapper.map(n, NoteOut.class));
 //        }
 //
 //        return notes;
 //    }
 
-//    public void addNote(Integer gameSessionId, Integer playerId, NoteDTOIN dto) {
+//    public void addNote(Integer gameSessionId, Integer playerId, NoteIn dto) {
 //        GameSessionModel gameSession = gameSessionRepository.findById(gameSessionId)
 //                .orElseThrow(() -> new ApiException("Game session not found"));
 //
 //        PlayerModel player = playerRepository.findById(playerId)
 //                .orElseThrow(() -> new ApiException("Player not found"));
 //
-//        NoteModel note = modelMapper.map(dto, NoteModel.class);
+//        Note note = modelMapper.map(dto, Note.class);
 //        note.setGameSession(gameSession);
 //        note.setPlayer(player);
 //
