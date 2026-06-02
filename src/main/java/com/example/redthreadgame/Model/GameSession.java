@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Check;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Check(constraints = "players_count > 0 AND players_count < 7")
 public class GameSession {
 
     @Id
@@ -25,10 +27,10 @@ public class GameSession {
     @Column(columnDefinition = "boolean", nullable = false)
     private Boolean isPrivate;
 
-    @Column(columnDefinition = "int check (playersCount > 0 and playersCount < 6 )", nullable = false)
+    @Column(columnDefinition = "int", nullable = false)
     private Integer playersCount;
 
-    @Column(columnDefinition = "int default 0")
+    @Column(columnDefinition = "int default 0", insertable = false)
     private Integer questionsCount;
 
     @Column(columnDefinition = "int")
