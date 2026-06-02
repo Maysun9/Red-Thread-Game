@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class NoteIN {
 
-    @NotEmpty(message = "Content is required")
+    @NotEmpty(message = "Content must not be empty")
     private String content;
 }
