@@ -26,7 +26,7 @@ public class NoteController {
 //    }
 //
 //    @PostMapping("/add/{gameSessionId}/{playerId}")
-//    public ResponseEntity<?> addNote(@PathVariable Integer gameSessionId, @PathVariable Integer playerId, @RequestBody @Valid NoteDTOIN dto) {
+//    public ResponseEntity<?> addNote(@PathVariable Integer gameSessionId, @PathVariable Integer playerId, @RequestBody @Valid NoteIn dto) {
 //        noteService.addNote(gameSessionId, playerId, dto);
 //        return ResponseEntity.status(200).body(new ApiResponse("Note added successfully"));
 //    }
