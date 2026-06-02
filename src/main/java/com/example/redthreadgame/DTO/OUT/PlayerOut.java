@@ -15,4 +15,8 @@ public class PlayerOut {
     private String email;
     private Integer age;
     private Integer score;
+
+//    private Set<InvitationOut> invitations;
+//    private Set<NoteOut> notes;
+//    private Set<SolutionProposalOut> solutionProposals;
 }

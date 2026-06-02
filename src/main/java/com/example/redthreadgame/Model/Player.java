@@ -1,5 +1,6 @@
 package com.example.redthreadgame.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,4 +35,14 @@ public class Player {
 
     @Column(columnDefinition = "int default 0", insertable = false)
     private Integer score;
+
+//    @ManyToMany(mappedBy = "players")
+//    private Set<Invitation> invitations;
+
+//    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
+//    private Set<Note> notes;
+
+//    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
+//    private Set<SolutionProposal> solutionProposals;
+
 }
