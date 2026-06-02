@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NoteIN {
+public class NoteIn {
 
-    @NotEmpty(message = "Content is required")
+    @NotEmpty(message = "Content must not be empty")
     private String content;
 }
