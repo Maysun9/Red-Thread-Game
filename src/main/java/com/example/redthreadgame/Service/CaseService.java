@@ -1,4 +1,4 @@
 package com.example.redthreadgame.Service;
 
-public class AdminService {
+public class CaseService {
 }

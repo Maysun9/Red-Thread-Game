@@ -1,4 +1,4 @@
 package com.example.redthreadgame.Repository;
 
-public interface AdminRepository {
+public class CaseRepository {
 }

@@ -1,4 +1,4 @@
 package com.example.redthreadgame.Model;
 
-public class AdmInModel {
+public class Case {
 }
