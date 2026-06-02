@@ -41,4 +41,13 @@ public class GameSession {
 
     @Column(columnDefinition = "datetime")
     private LocalDateTime endedAt;
+
+//    @OneToMany(mappedBy = "game_session", cascade = CascadeType.ALL)
+//    private Set<Hint> hints;
+//
+//    @OneToMany(mappedBy = "game_session", cascade = CascadeType.ALL)
+//    private Set<Note> notes;
+//
+//    @OneToMany(mappedBy = "game_session", cascade = CascadeType.ALL)
+//    private Set<SolutionProposal> solutionProposals;
 }
