@@ -1,7 +1,7 @@
 package com.example.redthreadgame.Controller;
 
 import com.example.redthreadgame.Api.ApiResponse;
-import com.example.redthreadgame.DTO.IN.NoteIN;
+import com.example.redthreadgame.DTO.IN.NoteIn;
 import com.example.redthreadgame.Service.NoteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class NoteController {
 //    }
 
     @PutMapping("/update/{noteId}")
-    public ResponseEntity<?> updateNote(@PathVariable Integer noteId, @RequestBody @Valid NoteIN dto) {
+    public ResponseEntity<?> updateNote(@PathVariable Integer noteId, @RequestBody @Valid NoteIn dto) {
         noteService.updateNote(noteId, dto);
         return ResponseEntity.status(200).body(new ApiResponse("Note updated successfully"));
     }

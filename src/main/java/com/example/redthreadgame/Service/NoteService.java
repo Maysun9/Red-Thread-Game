@@ -1,6 +1,6 @@
 package com.example.redthreadgame.Service;
 import com.example.redthreadgame.Api.ApiException;
-import com.example.redthreadgame.DTO.IN.NoteIN;
+import com.example.redthreadgame.DTO.IN.NoteIn;
 import com.example.redthreadgame.DTO.OUT.NoteOut;
 import com.example.redthreadgame.Model.Note;
 import com.example.redthreadgame.Repository.NoteRepository;
@@ -53,7 +53,7 @@ public class NoteService {
 //        noteRepository.save(note);
 //    }
 
-    public void updateNote(Integer noteId, NoteIN dto) {
+    public void updateNote(Integer noteId, NoteIn dto) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiException("Note not found"));
 
