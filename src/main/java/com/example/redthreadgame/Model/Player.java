@@ -20,10 +20,10 @@ public class Player {
     @Column(columnDefinition = "varchar(30)", nullable = false)
     private String name;
 
-    @Column(columnDefinition = "varchar(20)", nullable = false)
+    @Column(columnDefinition = "varchar(20)", nullable = false, unique = true)
     private String username;
 
-    @Column(columnDefinition = "varchar(50)", nullable = false)
+    @Column(columnDefinition = "varchar(50)", nullable = false, unique = true)
     private String email;
 
     @Column(columnDefinition = "varchar(50)", nullable = false)
