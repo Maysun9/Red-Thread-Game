@@ -21,7 +21,7 @@ public class SolutionProposalController {
 //    }
 //
 //    @PostMapping("/submit/{gameSessionId}/{playerId}/{suspectId}")
-//    public ResponseEntity<?> submitProposal(@PathVariable Integer gameSessionId, @PathVariable Integer playerId, @PathVariable Integer suspectId, @RequestBody @Valid SolutionProposalDTOIN dto) {
+//    public ResponseEntity<?> submitProposal(@PathVariable Integer gameSessionId, @PathVariable Integer playerId, @PathVariable Integer suspectId, @RequestBody @Valid SolutionProposalIn dto) {
 //        solutionProposalService.submitProposal(gameSessionId, playerId, suspectId, dto);
 //        return ResponseEntity.status(200).body(new ApiResponse("Solution proposal submitted successfully"));
 //    }

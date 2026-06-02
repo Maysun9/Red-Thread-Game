@@ -10,34 +10,35 @@ import lombok.*;
 @Getter
 @Setter
 public class SolutionProposalModel {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "varchar(500) not null")
     private String reason;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "varchar(20) not null")
     private String status;
 
-    @Column(columnDefinition = "int", nullable = true)
+    @Column(columnDefinition = "int not null")
     private Integer rejectCount;
 
-    @Column(columnDefinition = "int", nullable = true)
+    @Column(columnDefinition = "int not null")
     private Integer acceptCount;
 
-    // TODO: uncomment when GameSession is ready
-    // @ManyToOne
-    // @JoinColumn(name = "game_session_id")
-    // private GameSession gameSession;
-
-    // TODO: uncomment when Player is ready
-    // @ManyToOne
-    // @JoinColumn(name = "player_id")
-    // private Player player;
-
-    // TODO: uncomment when Suspect is ready
-    // @ManyToOne
-    // @JoinColumn(name = "suspect_id")
-    // private Suspect suspect;
+//    @ManyToOne
+//    @JoinColumn(name = "game_session_id", referencedColumnName = "id")
+//    @JsonIgnore
+//    private GameSessionModel gameSession;
+//
+//    @ManyToOne
+//    @JoinColumn(name = "player_id", referencedColumnName = "id")
+//    @JsonIgnore
+//    private PlayerModel player;
+//
+//    @ManyToOne
+//    @JoinColumn(name = "suspect_id", referencedColumnName = "id")
+//    @JsonIgnore
+//    private SuspectModel suspect;
 }
