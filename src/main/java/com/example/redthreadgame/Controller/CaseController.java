@@ -15,11 +15,8 @@ public class CaseController {
     private final CaseService caseService;
 
     @GetMapping("/get")
-
     public ResponseEntity<?> getAllCases() {
-
         return ResponseEntity.ok(caseService.getAllCases());
-
     }
     @GetMapping("/published")
     public ResponseEntity<?> getPublishedCases() {
