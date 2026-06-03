@@ -1,7 +1,6 @@
 package com.example.redthreadgame.Service;
 
 import com.example.redthreadgame.Api.ApiException;
-import com.example.redthreadgame.DTO.IN.InvitationIn;
 import com.example.redthreadgame.DTO.OUT.InvitationOut;
 import com.example.redthreadgame.Model.GameSession;
 import com.example.redthreadgame.Model.Invitation;
@@ -35,16 +34,14 @@ public class InvitationService {
         return invitations;
     }
 
-    public void addInvitation(Integer gameSessionId, Integer playerId, InvitationIn invitationIn){
+    public void addInvitation(Integer ownerId, Integer gameSessionId, Integer playerId){
         GameSession gameSession = checkGameSession(gameSessionId);
-//        Player owner = checkPlayer(ownerId);
-//        if(owner != gameSession)
+        Player owner = checkPlayer(ownerId);
+        if(owner != gameSession.getOwner())
+            throw new ApiException("Only game session owner can invite another players");
 
         Player player = checkPlayer(playerId);
-        Invitation invitation = modelMapper.map(invitationIn, Invitation.class);
-        invitation.setGameSession(gameSession);
-        invitation.setPlayer(player);
-        invitation.setStatus("PENDING");
+        Invitation invitation = new Invitation(null, "PENDING", gameSession, player);
 
         invitationRepository.save(invitation);
     }

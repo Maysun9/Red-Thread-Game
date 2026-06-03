@@ -1,9 +1,7 @@
 package com.example.redthreadgame.Controller;
 
 import com.example.redthreadgame.Api.ApiResponse;
-import com.example.redthreadgame.DTO.IN.InvitationIn;
 import com.example.redthreadgame.Service.InvitationService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +19,9 @@ public class InvitationController {
         return ResponseEntity.status(200).body(invitationService.getAllInvitations());
     }
 
-    @PostMapping("/add/{gameSessionId}/{playerId}")
-    public ResponseEntity<?> addInvitation(@PathVariable Integer gameSessionId, @PathVariable Integer playerId, @RequestBody @Valid InvitationIn invitation){
-        invitationService.addInvitation(gameSessionId, playerId, invitation);
+    @PostMapping("/add/{ownerId}/{gameSessionId}/{playerId}")
+    public ResponseEntity<?> addInvitation(@PathVariable Integer ownerId, @PathVariable Integer gameSessionId, @PathVariable Integer playerId){
+        invitationService.addInvitation(ownerId, gameSessionId, playerId);
         return ResponseEntity.status(200).body(new ApiResponse("Invitation added successfully"));
     }
 
