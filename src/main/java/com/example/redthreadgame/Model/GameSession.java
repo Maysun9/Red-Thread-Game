@@ -68,4 +68,12 @@ public class GameSession {
 
     @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL)
     private Set<SolutionProposal> solutionProposals;
+
+    @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<SessionPlayer> sessionPlayers;
+
+    @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Question> questions;
 }

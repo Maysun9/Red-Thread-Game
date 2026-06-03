@@ -56,4 +56,20 @@ public class Player {
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     @JsonIgnore
     private Set<GameSession> gameSessions;
+
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<SessionPlayer> sessionPlayers;
+
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<ProposalVote> proposalVotes;
+
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Hint> hints;
+
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Question> questions;
 }

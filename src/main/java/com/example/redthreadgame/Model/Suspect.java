@@ -35,4 +35,8 @@ public class Suspect {
     @OneToMany(mappedBy = "suspect", cascade = CascadeType.ALL)
     @JsonIgnore
     private Set<SolutionProposal> solutionProposal;
+
+    @OneToMany(mappedBy = "suspect", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Question> questions;
 }

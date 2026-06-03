@@ -19,8 +19,16 @@ public class Hint {
     @Column(columnDefinition = "varchar(500) not null")
     private String content;
 
+    @Column(columnDefinition = "int default 0")
+    private Integer deductedPoints;
+
     @ManyToOne
     @JoinColumn(name = "game_session_id", referencedColumnName = "id")
     @JsonIgnore
     private GameSession gameSession;
+
+    @ManyToOne
+    @JoinColumn(name = "player_id", referencedColumnName = "id")
+    @JsonIgnore
+    private Player player;
 }

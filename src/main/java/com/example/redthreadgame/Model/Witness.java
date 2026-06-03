@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,4 +34,8 @@ public class Witness {
     @JoinColumn(name = "case_id")
     @JsonIgnore
     private Case witnessCase;
+
+    @OneToMany(mappedBy = "witness", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Question> questions;
 }

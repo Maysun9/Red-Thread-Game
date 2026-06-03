@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "solution_proposals")
 @AllArgsConstructor
@@ -40,4 +42,8 @@ public class SolutionProposal {
     @ManyToOne
     @JoinColumn(name = "suspect_id", referencedColumnName = "id")
     private Suspect suspect;
+
+    @OneToMany(mappedBy = "solutionProposal", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<ProposalVote> proposalVotes;
 }
