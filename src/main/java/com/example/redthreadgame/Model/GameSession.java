@@ -49,6 +49,10 @@ public class GameSession {
     @JoinColumn(name = "case_id")
     private Case sessionCase;
 
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private Player owner;
+
     @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL)
     private Set<Hint> hints;
 
