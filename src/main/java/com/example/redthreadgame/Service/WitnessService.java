@@ -58,7 +58,6 @@ public class WitnessService {
         return witnesses;
     }
 
-
     private Witness checkWitness(Integer id) {
         Witness witness = witnessRepository.findWitnessById(id);
         if (witness == null)
