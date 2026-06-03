@@ -7,26 +7,32 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "evidences")
-public class Evidence {
+@Table(name = "suspects")
+public class Suspect {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(nullable = false)
-    private String title;
+    private String name;
 
-    @Column(columnDefinition = "varchar(500) not null")
-    private String description;
+    @Column(nullable = false)
+    private Integer age;
 
     @ManyToOne
     @JoinColumn(name = "case_id")
     @JsonIgnore
-    private Case evidenceCase;
+    private Case suspectCase;;
+
+    @OneToMany(mappedBy = "suspect", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<SolutionProposal> solutionProposal;
 }

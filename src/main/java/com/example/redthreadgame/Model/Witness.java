@@ -12,21 +12,24 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "evidences")
-public class Evidence {
+@Table(name = "witnesses")
+public class Witness {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(nullable = false)
-    private String title;
+    private String name;
 
     @Column(columnDefinition = "varchar(500) not null")
-    private String description;
+    private String statement;
+
+    @Column(nullable = false)
+    private Double reliabilityScore;
 
     @ManyToOne
     @JoinColumn(name = "case_id")
     @JsonIgnore
-    private Case evidenceCase;
+    private Case witnessCase;
 }
