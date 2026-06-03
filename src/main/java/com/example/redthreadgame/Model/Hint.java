@@ -4,12 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "notes")
+@Table(name = "hints")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class Note {
+@NoArgsConstructor
+
+public class Hint {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,8 +23,4 @@ public class Note {
     @JoinColumn(name = "game_session_id", referencedColumnName = "id")
     @JsonIgnore
     private GameSession gameSession;
-
-    @ManyToOne
-    @JoinColumn(name = "player_id", referencedColumnName = "id")
-    private Player player;
 }
