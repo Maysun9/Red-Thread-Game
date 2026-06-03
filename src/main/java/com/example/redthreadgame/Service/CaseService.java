@@ -33,7 +33,7 @@ public class CaseService {
 
     }
     public void addCase(Integer adminId, CaseIn dto) {
-        adminService.checkAdmin(adminId); // تأكد إن الأدمن موجود فقط
+        adminService.checkAdmin(adminId);
         Case c = modelMapper.map(dto, Case.class);
         c.setStatus("DRAFT");
         caseRepository.save(c);
