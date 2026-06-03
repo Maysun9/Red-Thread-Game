@@ -1,9 +1,6 @@
 package com.example.redthreadgame.DTO.IN;
 
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +18,7 @@ public class WitnessIn {
     private String statement;
     @NotNull(message = "reliability score cannot be null")
 
-    @DecimalMin(value = "0.0", message = "reliability score minimum is 0.0")
-    @DecimalMax(value = "1.0", message = "reliability score maximum is 1.0")
+    @Min(value = 0 , message = "reliability score minimum is 0")
+    @Max(value = 100 , message = "reliability score maximum is 100")
     private Double reliabilityScore;
 }
