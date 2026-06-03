@@ -18,13 +18,12 @@ public class CaseSolution {
     @Id
     private Integer id;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "varchar(500) not null")
     private String justification;
 
-//    @OneToOne
-//    @MapsId
-//    @JoinColumn(name = "case_id")
-//    @JsonIgnore
-//    private Case caseEntity;
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "case_id")
+    private Case solutionCase;
 
 }
