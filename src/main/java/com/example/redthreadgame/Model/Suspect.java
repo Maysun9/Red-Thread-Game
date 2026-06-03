@@ -25,8 +25,8 @@ public class Suspect {
     @Column(nullable = false)
     private Integer age;
 
-//    @ManyToOne
-//    @JoinColumn(name = "case_id")
-//    @JsonIgnore
-//    private Case caseEntity;
+    @ManyToOne
+    @JoinColumn(name = "case_id")
+    @JsonIgnore
+    private Case witnessCase;;
 }

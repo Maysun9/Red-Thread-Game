@@ -1,5 +1,6 @@
 package com.example.redthreadgame.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -41,6 +42,10 @@ public class GameSession {
 
     @Column(columnDefinition = "datetime")
     private LocalDateTime endedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "case_id")
+    private Case sessionCase;;
 
 //    @OneToMany(mappedBy = "game_session", cascade = CascadeType.ALL)
 //    private Set<Hint> hints;

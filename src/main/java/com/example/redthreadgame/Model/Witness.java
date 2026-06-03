@@ -1,5 +1,6 @@
 package com.example.redthreadgame.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,14 +22,14 @@ public class Witness {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "varchar(500) not null")
     private String statement;
 
     @Column(nullable = false)
     private Double reliabilityScore;
 
-//    @ManyToOne
-//    @JoinColumn(name = "case_id")
-//    @JsonIgnore
-//    private Case caseEntity;
+    @ManyToOne
+    @JoinColumn(name = "case_id")
+    @JsonIgnore
+    private Case witnessCase;
 }
