@@ -28,5 +28,5 @@ public class Evidence {
     @ManyToOne
     @JoinColumn(name = "case_id")
     @JsonIgnore
-    private Case evidenceCase;;
+    private Case evidenceCase;
 }

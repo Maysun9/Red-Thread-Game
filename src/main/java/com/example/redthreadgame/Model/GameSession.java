@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Check;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -47,12 +48,16 @@ public class GameSession {
     @JoinColumn(name = "case_id")
     private Case sessionCase;;
 
-//    @OneToMany(mappedBy = "game_session", cascade = CascadeType.ALL)
-//    private Set<Hint> hints;
-//
-//    @OneToMany(mappedBy = "game_session", cascade = CascadeType.ALL)
-//    private Set<Note> notes;
-//
-//    @OneToMany(mappedBy = "game_session", cascade = CascadeType.ALL)
-//    private Set<SolutionProposal> solutionProposals;
+    @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL)
+    private Set<Hint> hints;
+
+    @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL)
+    private Set<Note> notes;
+
+    @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Invitation> invitations;
+
+    @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL)
+    private Set<SolutionProposal> solutionProposals;
 }

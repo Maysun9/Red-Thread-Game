@@ -44,10 +44,10 @@ public class Case {
     @OneToMany(mappedBy = "suspectCase", cascade = CascadeType.ALL)
     private Set<Suspect> suspects;
 
-    @OneToMany(mappedBy = "suspectCase", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "evidenceCase", cascade = CascadeType.ALL)
     private Set<Evidence> evidences;
 
-    @OneToOne(mappedBy = "suspectCase", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "solutionCase", cascade = CascadeType.ALL)
     @JsonIgnore
     private CaseSolution caseSolution;
 

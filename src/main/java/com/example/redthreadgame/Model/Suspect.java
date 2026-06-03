@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,5 +30,9 @@ public class Suspect {
     @ManyToOne
     @JoinColumn(name = "case_id")
     @JsonIgnore
-    private Case witnessCase;;
+    private Case suspectCase;;
+
+    @OneToMany(mappedBy = "suspect", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<SolutionProposal> solutionProposal;
 }
