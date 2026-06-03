@@ -12,5 +12,5 @@ public class HintOut {
     private String content;
 
     // TODO: add after relations are ready
-    // private Integer gameSessionId;
+     private Integer gameSessionId;
 }
