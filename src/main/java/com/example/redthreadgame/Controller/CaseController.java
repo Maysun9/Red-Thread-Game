@@ -25,18 +25,17 @@ public class CaseController {
     public ResponseEntity<?> getPublishedCases() {
         return ResponseEntity.ok(caseService.getPublishedCases());
     }
-//    @PostMapping("“add/{adminId}")
-//    public ResponseEntity<?> addCase(@PathVariable Integer adminId, @RequestBody @Valid CaseIn dto) {
-//        caseService.addCase(adminId, dto);
-//        return ResponseEntity.status(200).body(new ApiResponse("Case added successfully"));
-//
-//    }
+
+    @PostMapping("add/{adminId}")
+    public ResponseEntity<ApiResponse> addCase(@PathVariable Integer adminId, @RequestBody @Valid CaseIn dto) {
+        caseService.addCase(adminId, dto);
+        return ResponseEntity.status(201).body(new ApiResponse("Case added successfully"));
+    }
 
     @PutMapping("update/{id}")
     public ResponseEntity<?> updateCase(@PathVariable Integer id, @RequestBody @Valid CaseIn dto) {
         caseService.updateCase(id, dto);
         return ResponseEntity.status(200).body(new ApiResponse("Case updated successfully"));
-
     }
     @DeleteMapping("delete/{id}")
     public ResponseEntity<?> deleteCase(@PathVariable Integer id) {
