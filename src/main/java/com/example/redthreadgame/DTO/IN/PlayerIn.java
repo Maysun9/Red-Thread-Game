@@ -24,7 +24,7 @@ public class PlayerIn {
     private String email;
 
     @NotEmpty(message = "Phone Number is required")
-    @Size(max = 10, message = "Phone Number must not exceed 10 characters")
+    @Size(max = 15, message = "Phone Number must not exceed 15 characters")
     private String phoneNumber;
 
     @NotEmpty(message = "Password is required")

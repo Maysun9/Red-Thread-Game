@@ -2,9 +2,15 @@ package com.example.redthreadgame.Service;
 
 import com.example.redthreadgame.Api.ApiException;
 import com.example.redthreadgame.DTO.IN.PlayerIn;
+import com.example.redthreadgame.DTO.OUT.GameSessionOut;
+import com.example.redthreadgame.DTO.OUT.InvitationOut;
 import com.example.redthreadgame.DTO.OUT.PlayerOut;
+import com.example.redthreadgame.Model.Invitation;
 import com.example.redthreadgame.Model.Player;
+import com.example.redthreadgame.Model.SessionPlayer;
+import com.example.redthreadgame.Repository.InvitationRepository;
 import com.example.redthreadgame.Repository.PlayerRepository;
+import com.example.redthreadgame.Repository.SessionPlayerRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -18,6 +24,8 @@ public class PlayerService {
 
     private final ModelMapper modelMapper;
     private final PlayerRepository playerRepository;
+    private final InvitationRepository invitationRepository;
+    private final SessionPlayerRepository sessionPlayerRepository;
 
 
     //BASIC CRUD
@@ -50,6 +58,26 @@ public class PlayerService {
     public void deletePlayer(Integer id){
         Player player = checkPlayer(id);
         playerRepository.delete(player);
+    }
+
+
+    //ِEXTRA ENDPOINTS
+    public List<InvitationOut> getMyInvitations(Integer playerId){
+        checkPlayer(playerId);
+        List<InvitationOut> invitations = new ArrayList<>();
+        for(Invitation i: invitationRepository.findAllByPlayerId(playerId)){
+            invitations.add(modelMapper.map(i, InvitationOut.class));
+        }
+        return invitations;
+    }
+
+    public List<GameSessionOut> getMyGameSessions(Integer playerId){
+        checkPlayer(playerId);
+        List<GameSessionOut> gameSessions = new ArrayList<>();
+        for(SessionPlayer s: sessionPlayerRepository.findAllByPlayerId(playerId)){
+            gameSessions.add(modelMapper.map(s.getGameSession(), GameSessionOut.class));
+        }
+        return gameSessions;
     }
 
 

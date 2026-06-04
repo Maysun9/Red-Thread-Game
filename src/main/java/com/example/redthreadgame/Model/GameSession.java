@@ -1,5 +1,6 @@
 package com.example.redthreadgame.Model;
 
+import com.example.redthreadgame.Enums.GameSessionStatusType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,13 +25,14 @@ public class GameSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(columnDefinition = "varchar(20) check (status = 'PENDING' or status = 'IN_PROGRESS' or status = 'COMPLETED')", nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(20)", nullable = false)
+    private GameSessionStatusType status;
 
     @Column(columnDefinition = "boolean", nullable = false)
     private Boolean isPrivate;
 
-    @Column(columnDefinition = "varchar(6)")
+    @Column(columnDefinition = "varchar(6)", unique = true)
     private String sessionCode;
 
     @Column(columnDefinition = "int", nullable = false)
@@ -70,7 +72,6 @@ public class GameSession {
     private Set<SolutionProposal> solutionProposals;
 
     @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL)
-    @JsonIgnore
     private Set<SessionPlayer> sessionPlayers;
 
     @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL)
