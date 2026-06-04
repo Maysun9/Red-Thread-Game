@@ -1,5 +1,6 @@
 package com.example.redthreadgame.Model;
 
+import com.example.redthreadgame.Enums.InvitationStatusType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -14,15 +15,16 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "invitation")
+@Table(name = "invitation", uniqueConstraints = @UniqueConstraint(columnNames = {"gameSession_id", "player_id"}))
 public class Invitation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(columnDefinition = "varchar(20) check (status = 'PENDING' or status = 'ACCEPTED' or status = 'REJECTED' or status = 'JOINED')")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(20)")
+    private InvitationStatusType status;
 
     @ManyToOne
     @JoinColumn(name = "gameSession_id")
@@ -30,6 +32,5 @@ public class Invitation {
 
     @ManyToOne
     @JoinColumn(name = "player_id")
-    @JsonIgnore // test and decide
     private Player player;
 }
