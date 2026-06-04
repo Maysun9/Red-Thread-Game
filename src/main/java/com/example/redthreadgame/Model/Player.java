@@ -30,7 +30,7 @@ public class Player {
     @Column(columnDefinition = "varchar(50)", nullable = false, unique = true)
     private String email;
 
-    @Column(columnDefinition = "varchar(10)", nullable = false, unique = true)
+    @Column(columnDefinition = "varchar(15)", nullable = false, unique = true)
     private String phoneNumber;
 
     @Column(columnDefinition = "varchar(50)", nullable = false)
@@ -43,6 +43,7 @@ public class Player {
     private Integer score;
 
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<Invitation> invitations;
 
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
