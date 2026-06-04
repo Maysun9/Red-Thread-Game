@@ -3,6 +3,7 @@ package com.example.redthreadgame.Controller;
 import com.example.redthreadgame.Api.ApiResponse;
 import com.example.redthreadgame.DTO.IN.CaseIn;
 import com.example.redthreadgame.Service.CaseService;
+import com.example.redthreadgame.Service.OpenAiService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CaseController {
     private final CaseService caseService;
+    private final OpenAiService openAiService;
 
     @GetMapping("/get")
     public ResponseEntity<?> getAllCases() {
@@ -45,6 +47,18 @@ public class CaseController {
         caseService.publishCase(id);
         return ResponseEntity.ok(new ApiResponse("Case published successfully"));
 
+    }
+
+    @PostMapping("/generate/{adminId}")
+    public ResponseEntity<ApiResponse> generateCase(@PathVariable Integer adminId) {
+        openAiService.generateCase(adminId);
+        return ResponseEntity.status(201).body(new ApiResponse("Case generated successfully as DRAFT"));
+    }
+
+    @PostMapping("/generate-and-publish/{adminId}")
+    public ResponseEntity<ApiResponse> generateAndPublishCase(@PathVariable Integer adminId) {
+        openAiService.generateAndPublishCase(adminId);
+        return ResponseEntity.status(201).body(new ApiResponse("Case generated and published successfully"));
     }
 
 }

@@ -48,15 +48,15 @@ public class EvidenceService {
         evidenceRepository.delete(checkEvidence(id));
     }
 
-     public List<EvidenceOut> getEvidencesDetails(Integer caseId) {
-         caseService.checkCase(caseId);
-         List<EvidenceOut> evidences = new ArrayList<>();
-         for (Evidence e : evidenceRepository.findEvidencesByEvidenceCaseId(caseId)) {             evidences.add(modelMapper.map(e, EvidenceOut.class));
-             evidences.add(modelMapper.map(e, EvidenceOut.class));
-         }
-         return evidences;
-     }
-
+    //--------END CRED-----------------------
+    public List<EvidenceOut> getEvidencesDetails(Integer caseId) {
+        caseService.checkCase(caseId);
+        List<EvidenceOut> evidences = new ArrayList<>();
+        for (Evidence e : evidenceRepository.findEvidencesByEvidenceCaseId(caseId)) {
+            evidences.add(modelMapper.map(e, EvidenceOut.class));
+        }
+        return evidences;
+    }
     private Evidence checkEvidence(Integer id) {
         Evidence evidence = evidenceRepository.findEvidenceById(id);
         if (evidence == null)
