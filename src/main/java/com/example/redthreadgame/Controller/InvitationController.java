@@ -33,9 +33,15 @@ public class InvitationController {
 
 
     //EXTRA ENDPOINTS
-    @PutMapping("/update-status/{id}/{status}")
-    public ResponseEntity<?> updateStatus(@PathVariable Integer id, @PathVariable String status){
-        invitationService.updateStatus(id, status);
-        return ResponseEntity.status(200).body(new ApiResponse("Status updated successfully"));
+    @PutMapping("/accept-invitation/{gameSessionId}/{playerId}")
+    public ResponseEntity<?> acceptInvitation(@PathVariable Integer gameSessionId, @PathVariable Integer playerId){
+        invitationService.acceptInvitation(gameSessionId, playerId);
+        return ResponseEntity.status(200).body(new ApiResponse("Invitation accepted successfully"));
+    }
+
+    @PutMapping("/reject-invitation/{gameSessionId}/{playerId}")
+    public ResponseEntity<?> rejectInvitation(@PathVariable Integer gameSessionId, @PathVariable Integer playerId){
+        invitationService.rejectInvitation(gameSessionId, playerId);
+        return ResponseEntity.status(200).body(new ApiResponse("Invitation rejected successfully"));
     }
 }
