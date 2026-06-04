@@ -41,7 +41,7 @@ public class CaseController {
         caseService.deleteCase(id);
         return ResponseEntity.ok(new ApiResponse("Case deleted successfully"));
     }
-    //سبب اختياره  لان نعدل على الستاتس
+    //مالها داعي بعد الاي اي
     @PatchMapping("/publish/{id}")
     public ResponseEntity<?> publishCase(@PathVariable Integer id) {
         caseService.publishCase(id);

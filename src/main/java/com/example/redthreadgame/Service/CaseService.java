@@ -37,9 +37,6 @@ public class CaseService {
         c.setStatus("DRAFT");
         caseRepository.save(c);
     }
-
-
-
     public void updateCase(Integer id, CaseIn dto) {
         Case old = checkCase(id);
         old.setTitle(dto.getTitle());
@@ -50,10 +47,9 @@ public class CaseService {
         caseRepository.save(old);
     }
     public void deleteCase(Integer id) {
-
         caseRepository.delete(checkCase(id));
-
     }
+    //---------------------------------------------------END CRED-----------------------------------------------------------------------
 
     //endpoint admin publish case
 public void publishCase(Integer id){
@@ -64,7 +60,6 @@ public void publishCase(Integer id){
 
     caseRepository.save(c);
 }
-
 //players show case
 public List<CaseOut> getPublishedCases() {
     List<CaseOut> cases = new ArrayList<>();
@@ -77,11 +72,9 @@ public List<CaseOut> getPublishedCases() {
 }
 //helper method
     public Case checkCase(Integer id) {
-
         Case c = caseRepository.findCaseById(id);
-
-        if (c == null) throw new ApiException("Case not found");
-
+        if (c == null)
+            throw new ApiException("Case not found");
         return c;
 
     }
