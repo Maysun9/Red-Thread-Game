@@ -28,14 +28,12 @@ public class EvidenceService {
         }
         return evidences;
     }
-
     public void addEvidence(Integer caseId, EvidenceIn dto) {
          Case c = caseService.checkCase(caseId);
         Evidence evidence = modelMapper.map(dto, Evidence.class);
         evidence.setEvidenceCase(c);
         evidenceRepository.save(evidence);
     }
-
     public void updateEvidence(Integer id, EvidenceIn dto) {
         Evidence old = checkEvidence(id);
         old.setTitle(dto.getTitle());
@@ -43,12 +41,12 @@ public class EvidenceService {
 
         evidenceRepository.save(old);
     }
-
     public void deleteEvidence(Integer id) {
         evidenceRepository.delete(checkEvidence(id));
     }
 
-    //--------END CRED-----------------------
+    //---------------------------------------------------END CRED-----------------------------------------------------------------------
+
     public List<EvidenceOut> getEvidencesDetails(Integer caseId) {
         caseService.checkCase(caseId);
         List<EvidenceOut> evidences = new ArrayList<>();
@@ -57,6 +55,8 @@ public class EvidenceService {
         }
         return evidences;
     }
+
+   //helper method
     private Evidence checkEvidence(Integer id) {
         Evidence evidence = evidenceRepository.findEvidenceById(id);
         if (evidence == null)

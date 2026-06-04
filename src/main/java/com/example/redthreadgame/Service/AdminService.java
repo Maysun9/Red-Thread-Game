@@ -25,7 +25,6 @@ public class AdminService {
         }
         return admins;
     }
-
     public void addAdmin(AdminIn dto) {
         // check the email is not duplicated
         if (adminRepository.findAdminByEmail(dto.getEmail()) != null) {
@@ -38,7 +37,6 @@ public class AdminService {
         Admin admin = modelMapper.map(dto, Admin.class);
         adminRepository.save(admin);
     }
-
     public void updateAdmin(Integer id, AdminIn dto) {
         Admin old = checkAdmin(id);
         old.setName(dto.getName());
@@ -48,14 +46,15 @@ public class AdminService {
 
         adminRepository.save(old);
     }
-
     public void deleteAdmin(Integer id) {
         adminRepository.delete(checkAdmin(id));
     }
+    //---------------------------------------------------END CRED-----------------------------------------------------------------------
 
     public Admin checkAdmin(Integer id) {
         Admin admin = adminRepository.findAdminById(id);
-        if (admin == null) throw new ApiException("Admin not found");
+        if (admin == null)
+            throw new ApiException("Admin not found");
         return admin;
     }
 }
