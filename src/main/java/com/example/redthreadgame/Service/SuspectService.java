@@ -28,8 +28,7 @@ public class SuspectService {
     private final ElevenLabsService elevenLabsService;
     private final GameSessionRepository gameSessionRepository;
 
-
-    public List<SuspectOut> getAllSuspects() {
+  public List<SuspectOut> getAllSuspects() {
       List<SuspectOut> suspects = new ArrayList<>();
       for (Suspect s : suspectRepository.findAll()) {
           suspects.add(modelMapper.map(s, SuspectOut.class));
@@ -85,7 +84,6 @@ public class SuspectService {
         String audioFileName = elevenLabsService.generateVoice(answer, suspect.getGender(), suspect.getVoiceTone());
         return new VoiceAnswerOut(answer, audioFileName);
     }
-
     public String checkCorrectSuspect(Integer gameSessionId, Integer suspectId, String playerReason) {
         GameSession gameSession = gameSessionRepository.findGameSessionById(gameSessionId);
         if (gameSession == null)
