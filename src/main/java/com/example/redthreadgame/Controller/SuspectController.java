@@ -51,8 +51,8 @@ public class SuspectController {
         return ResponseEntity.status(200).body(suspectService.askSuspect(suspectId, dto));
     }
     @PostMapping("/check/{gameSessionId}/{suspectId}")
-    public ResponseEntity<?> checkCorrectSuspect(@PathVariable Integer gameSessionId, @PathVariable Integer suspectId,@RequestBody @Valid SuspectIn dto) {
-        String result = openAiService.checkCorrectSuspect(gameSessionId, suspectId, dto.getReason());
-        return ResponseEntity.status(200).body(new ApiResponse(result));
+    public ResponseEntity<?> checkCorrectSuspect(@PathVariable Integer gameSessionId, @PathVariable Integer suspectId, @RequestBody @Valid SuspectIn dto) {
+        String result = suspectService.checkCorrectSuspect(gameSessionId, suspectId, dto.getReason());
+        return ResponseEntity.status(200).body(result);
     }
 }
