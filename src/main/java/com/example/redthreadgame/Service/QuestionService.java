@@ -83,7 +83,10 @@ public class QuestionService {
                 - If the question is outside what this witness could know, say you do not know.
                 - If the player asks directly who is guilty, answer from this witness perspective only.
                 - Keep the answer natural, short, and useful for investigation.
-                - Answer in the same language as the player's question.
+                - Answer in English only.
+                - Write with a natural tone matching the witness voiceTone.
+                - Do not include stage directions, brackets, emotion labels, or sound effects.
+                - Show the tone through natural wording, hesitation, confidence, or caution.
 
                 Case title:
                 %s
@@ -104,6 +107,8 @@ public class QuestionService {
                 Name: %s
                 Statement: %s
                 Reliability score: %s
+                Gender: %s
+                Voice tone: %s
 
                 Player question:
                 %s
@@ -116,11 +121,13 @@ public class QuestionService {
                 witness.getName(),
                 witness.getStatement(),
                 witness.getReliabilityScore(),
+                witness.getGender(),
+                witness.getVoiceTone(),
                 dto.getQuestionText()
         );
 
         String answer = openAiService.generateAnswer(prompt);
-        String audioFileName = elevenLabsService.generateVoice(answer);
+        String audioFileName = elevenLabsService.generateVoice(answer, witness.getGender(), witness.getVoiceTone());
 
         Question question = modelMapper.map(dto, Question.class);
         question.setTargetType(QuestionTargetType.WITNESS);
@@ -158,7 +165,10 @@ public class QuestionService {
                 - Do not invent evidence, suspects, witnesses, dates, places, or actions not listed below.
                 - If the question is outside what this suspect could know, say you do not know.
                 - Keep the answer natural, short, and useful for investigation.
-                - Answer in the same language as the player's question.
+                - Answer in English only.
+                - Write with a natural tone matching the suspect voiceTone.
+                - Do not include stage directions, brackets, emotion labels, or sound effects.
+                - Show the tone through natural wording, hesitation, confidence, defensiveness, or caution.
 
                 Case title:
                 %s
@@ -178,6 +188,8 @@ public class QuestionService {
                 Current suspect:
                 Name: %s
                 Age: %s
+                Gender: %s
+                Voice tone: %s
 
                 Player question:
                 %s
@@ -189,11 +201,13 @@ public class QuestionService {
                 buildEvidencesText(sessionCase),
                 suspect.getName(),
                 suspect.getAge(),
+                suspect.getGender(),
+                suspect.getVoiceTone(),
                 dto.getQuestionText()
         );
 
         String answer = openAiService.generateAnswer(prompt);
-        String audioFileName = elevenLabsService.generateVoice(answer);
+        String audioFileName = elevenLabsService.generateVoice(answer, suspect.getGender(), suspect.getVoiceTone());
 
         Question question = modelMapper.map(dto, Question.class);
         question.setTargetType(QuestionTargetType.SUSPECT);
@@ -298,7 +312,7 @@ public class QuestionService {
     private String buildWitnessesText(Case sessionCase) {
         String text = "";
         for (Witness w : sessionCase.getWitnesses()) {
-            text += "- " + w.getName() + ": " + w.getStatement() + " Reliability: " + w.getReliabilityScore() + "\n";
+            text += "- " + w.getName() + ": " + w.getStatement() + " Reliability: " + w.getReliabilityScore() + " Gender: " + w.getGender() + " Voice tone: " + w.getVoiceTone() + "\n";
         }
         return text;
     }
@@ -306,7 +320,7 @@ public class QuestionService {
     private String buildSuspectsText(Case sessionCase) {
         String text = "";
         for (Suspect s : sessionCase.getSuspects()) {
-            text += "- " + s.getName() + ", age " + s.getAge() + "\n";
+            text += "- " + s.getName() + ", age " + s.getAge() + " Gender: " + s.getGender() + " Voice tone: " + s.getVoiceTone() + "\n";
         }
         return text;
     }
