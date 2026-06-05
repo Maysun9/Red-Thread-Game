@@ -96,21 +96,21 @@ public class SuspectService {
             throw new ApiException("Suspect does not belong to this case");
 
         String prompt = """
-                You are a mystery game judge analyzing a detective team's performance.
-                
-                Correct solution: %s
-                
-                Player accused: %s
-                Player reason: %s
-                
-                Respond in this exact JSON format:
-                {
-                  "result": "You won! Great detective work!" or "You lost! Better luck next time!",
-                  "analysis": "2-3 sentences analyzing how well the team played",
-                  "focusOn": "1-2 specific areas to improve next time"
-                }
-                Return ONLY the JSON, no extra text.
-                """.formatted(caseSolution.getJustification(), suspect.getName(), playerReason);
+            You are a mystery game judge analyzing a detective team's performance.
+            
+            Correct solution: %s
+            
+            Player accused: %s
+            Player reason: %s
+            
+            Respond in this exact JSON format:
+            {
+              "result": "You won! Great detective work!" or "You lost! Better luck next time!",
+              "analysis": "2-3 sentences analyzing how well the team played",
+              "focusOn": "1-2 specific areas to improve next time"
+            }
+            Return ONLY the JSON, no extra text.
+            """.formatted(caseSolution.getJustification(), suspect.getName(), playerReason);
 
         String result = openAiService.generateAnswer(prompt);
         return result.trim().replace("```json", "").replace("```", "").trim();

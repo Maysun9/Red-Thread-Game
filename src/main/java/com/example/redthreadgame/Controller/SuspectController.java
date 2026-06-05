@@ -50,7 +50,6 @@ public class SuspectController {
     public ResponseEntity<?> askSuspect(@PathVariable Integer suspectId, @RequestBody @Valid QuestionIn dto) {
         return ResponseEntity.status(200).body(suspectService.askSuspect(suspectId, dto));
     }
-    @PostMapping("/check/{gameSessionId}/{suspectId}")
     public ResponseEntity<?> checkCorrectSuspect(@PathVariable Integer gameSessionId, @PathVariable Integer suspectId, @RequestBody @Valid SuspectIn dto) {
         String result = suspectService.checkCorrectSuspect(gameSessionId, suspectId, dto.getReason());
         return ResponseEntity.status(200).body(result);
