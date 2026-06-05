@@ -60,7 +60,7 @@ public class HintService {
 
         Case sessionCase = gameSession.getSessionCase();
         String prompt = """
-                You are generating a hint for a detective mystery game in English only.
+                You are generating a hint for a detective mystery game.
 
                 Rules:
                 - Give exactly one useful hint.
@@ -70,7 +70,7 @@ public class HintService {
                 - Guide the player toward an important clue, contradiction, witness detail, suspect behavior, or evidence.
                 - Make the hint specific to this case.
                 - Keep it short and natural.
-                - Answer in Arabic if possible.
+                - Answer in English.
 
                 Case title:
                 %s
