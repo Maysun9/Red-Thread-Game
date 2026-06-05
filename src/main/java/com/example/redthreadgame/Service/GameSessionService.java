@@ -44,10 +44,15 @@ public class GameSessionService {
         String code = generateCode();
 
         GameSession gameSession = modelMapper.map(gameSessionIn, GameSession.class);
-        gameSession.setSessionCode(code);
-        gameSession.setSessionCase(gameSession.getIsPrivate() ? sessionCase : null);
+        gameSession.setSessionCode(gameSession.getIsPrivate() ? code : null);
+        gameSession.setSessionCase(sessionCase);
         gameSession.setOwner(player);
         gameSession.setStatus(PENDING);
+        if(sessionCase.getDifficulty().equalsIgnoreCase("hard"))
+            gameSession.setScore(100);
+        else if (sessionCase.getDifficulty().equalsIgnoreCase("medium"))
+            gameSession.setScore(80);
+        else gameSession.setScore(60);
 
         gameSessionRepository.save(gameSession);
 
@@ -148,23 +153,27 @@ public class GameSessionService {
         notifyOwnerPlayerLeft(player, gameSession);
     }
 
-    public void startSession(Integer gameSessionId, Integer playerId) {
+    public void cancelSession(Integer gameSessionId, Integer playerId){
         GameSession gameSession = checkGameSession(gameSessionId);
 
         // check owner
-        if (!gameSession.getOwner().getId().equals(playerId))
-            throw new ApiException("Only the owner can start the session");
+        if(!gameSession.getOwner().getId().equals(playerId))
+            throw new ApiException("Only the owner can cancel the session");
 
         // check status
-        if (gameSession.getStatus() != PENDING)
-            throw new ApiException("Session is already started or completed");
+        if(gameSession.getStatus() != PENDING)
+            throw new ApiException("You can only cancel a pending session");
 
-        gameSession.setStatus(IN_PROGRESS);
-        gameSession.setStartedAt(LocalDateTime.now());
-
+        gameSession.setStatus(CANCELLED);
         gameSessionRepository.save(gameSession);
 
-        notifyPlayersSessionStarted(gameSession);
+        // notify players
+        notifyPlayerSessionCancelled(gameSession);
+    }
+
+    public GameSessionOut getLobby(Integer gameSessionId){
+        GameSession gameSession = checkGameSession(gameSessionId);
+        return modelMapper.map(gameSession, GameSessionOut.class);
     }
 
 
@@ -202,40 +211,8 @@ public class GameSessionService {
         SessionPlayer sessionPlayer = new SessionPlayer(null, SessionPlayerRole.MEMBER, SessionPlayerStatus.JOINED, LocalDateTime.now(), gameSession, player);
 
         sessionPlayerRepository.save(sessionPlayer);
+        notifyOwnerPlayerJoined(player, gameSession);
         checkAutoStart(gameSession);
-    }
-
-    private void notifyPlayersSessionStarted(GameSession gameSession){
-        List<SessionPlayer> sessionPlayers = sessionPlayerRepository.findAllByGameSessionId(gameSession.getId());
-        for(SessionPlayer sp : sessionPlayers){
-            emailService.send(
-                    sp.getPlayer().getEmail(),
-                    "Game Session #" + gameSession.getId() + " Has Started!",
-                    "Dear " + sp.getPlayer().getName() + ",\n\n" +
-                            "Game session #" + gameSession.getId() + " has started!\n\n" +
-                            "Session Details:\n" +
-                            "- Session Code: " + gameSession.getSessionCode() + "\n" +
-                            "- Players Count: " + gameSession.getPlayersCount() + "\n" +
-                            "- Started At: " + gameSession.getStartedAt() + "\n\n" +
-                            "Best regards,\n" +
-                            "Red Thread Game System"
-            );
-        }
-    }
-
-    private void notifyOwnerPlayerLeft(Player player, GameSession gameSession){
-        emailService.send(
-                gameSession.getOwner().getEmail(),
-                "Player Left - Game Session #" + gameSession.getId(),
-                "Dear " + gameSession.getOwner().getName() + ",\n\n" +
-                        "Player " + player.getName() + " has left your game session #" + gameSession.getId() + ".\n\n" +
-                        "Player Details:\n" +
-                        "- Name: " + player.getName() + "\n" +
-                        "- Username: " + player.getUsername() + "\n" +
-                        "- Email: " + player.getEmail() + "\n\n" +
-                        "Best regards,\n" +
-                        "Red Thread Game System"
-        );
     }
 
     private void checkAutoStart(GameSession gameSession){
@@ -273,5 +250,74 @@ public class GameSessionService {
         // check if player already played this case
         if(sessionPlayerRepository.existsByPlayerIdAndGameSession_SessionCase_Id(player.getId(), gameSession.getSessionCase().getId()))
             throw new ApiException("You already played this case before");
+    }
+
+    private void notifyPlayersSessionStarted(GameSession gameSession) {
+        List<SessionPlayer> sessionPlayers =
+                sessionPlayerRepository.findAllByGameSessionId(gameSession.getId());
+
+        for (SessionPlayer sp : sessionPlayers) {
+            emailService.send(
+                    sp.getPlayer().getEmail(),
+                    "🕵️ Investigation Started! Case Session #" + gameSession.getId(),
+                    "Hey Detective " + sp.getPlayer().getName() + "! 🔍\n\n" +
+                            "The investigation is officially underway! 🚨\n\n" +
+                            "📂 Session Details:\n" +
+                            "🔑 Session Code: " + gameSession.getSessionCode() + "\n" +
+                            "👥 Detectives: " + gameSession.getPlayersCount() + "\n" +
+                            "⏰ Started At: " + gameSession.getStartedAt() + "\n\n" +
+                            "🧩 Gather the clues.\n" +
+                            "🗣️ Question the witnesses.\n" +
+                            "😈 Find the culprit before anyone else!\n\n" +
+                            "Good luck, Detective! 🕵️‍♂️\n\n" +
+                            "🧵 Red Thread Team"
+            );
+        }
+    }
+
+    private void notifyOwnerPlayerJoined(Player player, GameSession gameSession) {
+        emailService.send(
+                gameSession.getOwner().getEmail(),
+                "🎉 New Detective Joined Your Session!",
+                "Hey Chief Detective " + gameSession.getOwner().getName() + "! 🕵️\n\n" +
+                        "A new detective has joined your investigation team! 🎉\n\n" +
+                        "👤 Detective Info:\n" +
+                        "📛 Name: " + player.getName() + "\n" +
+                        "🏷️ Username: " + player.getUsername() + "\n\n" +
+                        "💪 Your squad is getting stronger.\n" +
+                        "🔎 Time to solve this mystery together!\n\n" +
+                        "🧵 Red Thread Team"
+        );
+    }
+
+    private void notifyOwnerPlayerLeft(Player player, GameSession gameSession) {
+        emailService.send(
+                gameSession.getOwner().getEmail(),
+                "👋 Detective Left Your Session",
+                "Hey Chief Detective " + gameSession.getOwner().getName() + "! 🕵️\n\n" +
+                        "One of your detectives has left the investigation. 🚪\n\n" +
+                        "👤 Detective Info:\n" +
+                        "📛 Name: " + player.getName() + "\n" +
+                        "🏷️ Username: " + player.getUsername() + "\n\n" +
+                        "🔍 Don't worry! The mystery is still waiting to be solved.\n\n" +
+                        "🧵 Red Thread Team"
+        );
+    }
+
+    private void notifyPlayerSessionCancelled(GameSession gameSession) {
+        List<SessionPlayer> sessionPlayers =
+                sessionPlayerRepository.findAllByGameSessionId(gameSession.getId());
+
+        for (SessionPlayer sp : sessionPlayers) {
+            emailService.send(
+                    sp.getPlayer().getEmail(),
+                    "❌ Investigation Cancelled",
+                    "Hey Detective " + sp.getPlayer().getName() + "! 🕵️\n\n" +
+                            "The investigation session you joined has been cancelled. 📂❌\n\n" +
+                            "👀 Looks like this mystery will remain unsolved... for now.\n\n" +
+                            "🔍 Keep an eye out for the next case!\n\n" +
+                            "🧵 Red Thread Team"
+            );
+        }
     }
 }
