@@ -113,7 +113,7 @@ public class SolutionProposalService {
         proposal.setStatus(SolutionProposalStatusType.WRONG);
         solutionProposalRepository.save(proposal);
     }
-    public Integer evaluateProposal(Integer proposalId) {
+    public String evaluateProposal(Integer proposalId) {
         SolutionProposal proposal = solutionProposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ApiException("Solution proposal not found"));
 
@@ -139,7 +139,12 @@ public class SolutionProposalService {
         if (joinedPlayers.isEmpty())
             throw new ApiException("No joined players found in this game session");
 
-        String analysisResult = openAiService.evaluateSolution(proposal.getReason(), proposal.getSuspect().getName(), proposal.getSuspect().getAge(), solution.getJustification());
+        String analysisResult = openAiService.evaluateSolution(
+                proposal.getReason(),
+                proposal.getSuspect().getName(),
+                proposal.getSuspect().getAge(),
+                solution.getJustification()
+        );
 
         boolean isCorrect;
         try {
@@ -157,7 +162,7 @@ public class SolutionProposalService {
             gameSessionRepository.save(gameSession);
             solutionProposalRepository.save(proposal);
             notifyPlayersWrongSolution(gameSession, proposal, joinedPlayers);
-            return 0;
+            return analysisResult;
         }
 
         Integer totalScore = hintService.calculateTotalScore(gameSession.getId());
@@ -177,7 +182,7 @@ public class SolutionProposalService {
         gameSessionRepository.save(gameSession);
         solutionProposalRepository.save(proposal);
         notifyPlayersCorrectSolution(gameSession, proposal, totalScore, playerScore, joinedPlayers);
-        return totalScore;
+        return analysisResult;
     }
 
     private void checkCanPlay(GameSession gameSession, Player player) {
