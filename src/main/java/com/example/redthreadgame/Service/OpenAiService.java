@@ -27,7 +27,7 @@ public class OpenAiService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    //generate case
+    // Generates a full mystery case with witnesses, suspects, evidences, solution, gender, and voice tone, then saves it as DRAFT.
     public void generateCase(Integer adminId, String password) {
         adminService.verifyAdmin(adminId, password);
         String prompt = """
@@ -133,7 +133,7 @@ public class OpenAiService {
     }
 
 
-//generate answer
+    // Sends a prepared prompt to OpenAI and returns the generated answer text.
     public String generateAnswer(String prompt) {
         String response = WebClient.builder().baseUrl("https://api.openai.com").build().post().uri("/v1/chat/completions").header("Authorization", "Bearer " + openAiApiKey)
                 .header("Content-Type", "application/json")
@@ -205,7 +205,7 @@ public class OpenAiService {
         }
     }
 
-    //calculate score
+    // Legacy score calculator kept for older logic; current gameplay uses GameSession.score directly.
     public Integer calculateScore(Integer questionCount, Integer hintCount) {
         int baseScore = 100;
         int questionPenalty = questionCount * 5;
@@ -214,12 +214,14 @@ public class OpenAiService {
         return Math.max(1, finalScore);
     }
 
+    // Keeps generated gender values limited to MALE or FEMALE before saving.
     private String normalizeGender(String gender) {
         if ("FEMALE".equalsIgnoreCase(gender))
             return "FEMALE";
         return "MALE";
     }
 
+    // Keeps generated voice tone values limited to the supported tones, otherwise uses a default tone.
     private String normalizeVoiceTone(String voiceTone, String defaultTone) {
         if (voiceTone == null)
             return defaultTone;
@@ -244,5 +246,30 @@ public class OpenAiService {
             case "MEDIUM" -> "HARD";
             default       -> "EASY";
         };
+    public String analyzePlayer(String prompt) {
+        String response = WebClient.builder()
+                .baseUrl("https://api.openai.com")
+                .build()
+                .post()
+                .uri("/v1/chat/completions")
+                .header("Authorization", "Bearer " + openAiApiKey)
+                .header("Content-Type", "application/json")
+                .bodyValue("""
+                    {
+                      "model": "gpt-4o-mini",
+                      "messages": [{"role": "user", "content": "%s"}],
+                      "temperature": 0.7
+                    }
+                    """.formatted(prompt.replace("\"", "\\\"").replace("\n", "\\n")))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+        try {
+            JsonNode root = objectMapper.readTree(response);
+            return root.path("choices").get(0).path("message").path("content").asText();
+        } catch (Exception e) {
+            throw new ApiException("Failed to generate player analysis: " + e.getMessage());
+        }
     }
     }
