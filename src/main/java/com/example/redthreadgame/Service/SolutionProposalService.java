@@ -12,6 +12,8 @@ import com.example.redthreadgame.Model.SessionPlayer;
 import com.example.redthreadgame.Model.SolutionProposal;
 import com.example.redthreadgame.Model.Suspect;
 import com.example.redthreadgame.Repository.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -70,7 +72,29 @@ public class SolutionProposalService {
         solutionProposalRepository.save(proposal);
     }// Creates a pending solution proposal after validating the session, player, and accused suspect.
 
-    public Integer evaluateProposal(Integer proposalId) {
+        for (SolutionProposal s : solutionProposalRepository.findAllByPlayerId(playerId)) {
+            proposals.add(modelMapper.map(s, SolutionProposalOut.class));
+        }
+
+        return proposals;
+    }
+
+    public void markProposalCorrect(Integer proposalId) {
+        SolutionProposal proposal = solutionProposalRepository.findById(proposalId)
+                .orElseThrow(() -> new ApiException("Solution proposal not found"));
+
+        proposal.setStatus(SolutionProposalStatusType.CORRECT);
+        solutionProposalRepository.save(proposal);
+    }
+
+    public void markProposalWrong(Integer proposalId) {
+        SolutionProposal proposal = solutionProposalRepository.findById(proposalId)
+                .orElseThrow(() -> new ApiException("Solution proposal not found"));
+
+        proposal.setStatus(SolutionProposalStatusType.WRONG);
+        solutionProposalRepository.save(proposal);
+    }
+    public String evaluateProposal(Integer proposalId) {
         SolutionProposal proposal = solutionProposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ApiException("Solution proposal not found"));
 
@@ -96,21 +120,30 @@ public class SolutionProposalService {
         if (joinedPlayers.isEmpty())
             throw new ApiException("No joined players found in this game session");
 
-        Boolean isCorrect = openAiService.evaluateSolution(
+        String analysisResult = openAiService.evaluateSolution(
                 proposal.getReason(),
                 proposal.getSuspect().getName(),
                 proposal.getSuspect().getAge(),
                 solution.getJustification()
         );
+
+        boolean isCorrect;
+        try {
+            JsonNode analysisJson = new ObjectMapper().readTree(analysisResult);
+            isCorrect = analysisJson.path("isCorrect").asBoolean();
+        } catch (Exception e) {
+            throw new ApiException("Failed to parse AI response");
+        }
+
         if (!isCorrect) {
             proposal.setStatus(SolutionProposalStatusType.WRONG);
             gameSession.setScore(0);
-            gameSession.setStatus(GameSessionStatusType.COMPLETED);
+            gameSession.setStatus(GameSessionStatusType.LOST);
             gameSession.setEndedAt(LocalDateTime.now());
             gameSessionRepository.save(gameSession);
             solutionProposalRepository.save(proposal);
             notifyPlayersWrongSolution(gameSession, proposal, joinedPlayers);
-            return 0;
+            return analysisResult;
         }
 
         Integer totalScore = hintService.calculateTotalScore(gameSession.getId());
@@ -118,7 +151,7 @@ public class SolutionProposalService {
 
         proposal.setStatus(SolutionProposalStatusType.CORRECT);
         gameSession.setScore(totalScore);
-        gameSession.setStatus(GameSessionStatusType.COMPLETED);
+        gameSession.setStatus(GameSessionStatusType.WON);
         gameSession.setEndedAt(LocalDateTime.now());
 
         for (SessionPlayer s : joinedPlayers) {
@@ -130,8 +163,8 @@ public class SolutionProposalService {
         gameSessionRepository.save(gameSession);
         solutionProposalRepository.save(proposal);
         notifyPlayersCorrectSolution(gameSession, proposal, totalScore, playerScore, joinedPlayers);
-        return totalScore;
-    }// After vote approval, asks AI to judge the proposal, completes the session, updates scores, and sends result emails.
+        return analysisResult;
+    }
 
     private void checkCanPlay(GameSession gameSession, Player player) {
         if (gameSession.getStatus() != GameSessionStatusType.IN_PROGRESS)

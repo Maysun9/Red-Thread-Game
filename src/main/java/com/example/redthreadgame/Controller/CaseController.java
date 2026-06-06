@@ -58,4 +58,20 @@ public class CaseController {
         openAiService.generateCase(adminId, dto.getPassword());
         return ResponseEntity.status(200).body(new ApiResponse("Case generated successfully as DRAFT"));
     }
+
+
+    @GetMapping("/most-lost")
+    public ResponseEntity<?> getMostLost() {
+        return ResponseEntity.status(200).body(caseService.getMostLost());
+    }
+
+    @GetMapping("/most-won")
+    public ResponseEntity<?> getMostWon() {
+        return ResponseEntity.status(200).body(caseService.getMostWon());
+    }
+
+    @GetMapping("/not-played/{playerId}")
+    public ResponseEntity<?> getNotPlayedCases(@PathVariable Integer playerId) {
+        return ResponseEntity.status(200).body(caseService.getNotPlayedCases(playerId));
+    }
 }

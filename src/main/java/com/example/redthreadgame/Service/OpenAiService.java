@@ -21,8 +21,6 @@ public class OpenAiService {
     private final EvidenceRepository evidenceRepository;
     private final CaseSolutionRepository caseSolutionRepository;
     private final AdminService adminService;
-    private final GameSessionRepository gameSessionRepository;
-
 
     @Value("${openai.api.key}")
     private String openAiApiKey;
@@ -43,7 +41,8 @@ public class OpenAiService {
                         {
                           "title": "case title",
                           "scenario": "detailed case scenario 3-5 sentences",
-                          "difficulty": "EASY or MEDIUM or HARD",
+                        "difficulty": "%s"
+                
                         "witnesses": [
                        {"name": "witness name", "statement": "witness statement", "reliabilityScore": score between 1 and 100 based on witness credibility, "gender": "MALE or FEMALE", "voiceTone": "CALM or NERVOUS or DEFENSIVE or SUSPICIOUS or SAD or CONFIDENT"},
                        {"name": "witness name", "statement": "witness statement", "reliabilityScore": score between 1 and 100 based on witness credibility, "gender": "MALE or FEMALE", "voiceTone": "CALM or NERVOUS or DEFENSIVE or SUSPICIOUS or SAD or CONFIDENT"},
@@ -91,7 +90,7 @@ public class OpenAiService {
             Case newCase = new Case();
             newCase.setTitle(caseJson.path("title").asText());
             newCase.setScenario(caseJson.path("scenario").asText());
-            newCase.setDifficulty(caseJson.path("difficulty").asText());
+            newCase.setDifficulty(getNextDifficulty());
             newCase.setStatus("DRAFT");
             caseRepository.save(newCase);
 
@@ -154,92 +153,53 @@ public class OpenAiService {
         }
     }
 
-    // Legacy judge method that checks a suspect and reason directly and returns a win/loss message.
-    public String checkCorrectSuspect(Integer gameSessionId, Integer suspectId, String playerReason) {
-        GameSession gameSession = gameSessionRepository.findGameSessionById(gameSessionId);
-        if (gameSession == null)
-            throw new ApiException("Game session not found");
-
-        CaseSolution caseSolution = gameSession.getSessionCase().getCaseSolution();
-        if (caseSolution == null)
-            throw new ApiException("Case solution not found");
-
-        Suspect suspect = suspectRepository.findSuspectById(suspectId);
-        if (suspect == null)
-            throw new ApiException("Suspect not found");
-
-        if (!suspect.getSuspectCase().getId().equals(gameSession.getSessionCase().getId()))
-            throw new ApiException("Suspect does not belong to this case");
-
+    //evaluation solution
+    public String evaluateSolution(String playerReason, String accusedSuspectName, Integer accusedSuspectAge, String correctJustification) {
         String prompt = """
-                You are a mystery game judge.
-                
-                Correct solution: %s
-                
-                Player accused: %s
-                Player reason: %s
-                
-                Does the player correctly identify the culprit and provide a reasonable explanation?
-                Reply with ONLY one of these two:
-                "You won! Great detective work!"
-                "You lost! Better luck next time!"
-                """.formatted(caseSolution.getJustification(), suspect.getName(), playerReason);
-
-        String response = WebClient.builder().baseUrl("https://api.openai.com").build().post().uri("/v1/chat/completions").header("Authorization", "Bearer " + openAiApiKey).header("Content-Type", "application/json").bodyValue("""
-                        {
-                          "model": "gpt-4o-mini",
-                          "messages": [{"role": "user", "content": "%s"}],
-                          "temperature": 0.0
-                        }
-                        """.formatted(prompt.replace("\"", "\\\"").replace("\n", "\\n"))).retrieve().bodyToMono(String.class).block();
-
-        try {
-            JsonNode root = objectMapper.readTree(response);
-            return root.path("choices").get(0).path("message").path("content").asText().trim().replace("\"", "");
-        } catch (Exception e) {
-            throw new ApiException("Failed to evaluate solution: " + e.getMessage());
-        }
-    }
-    // Evaluates the team proposal by comparing accused suspect and reason against the case solution.
-    public boolean evaluateSolution(String playerReason, String accusedSuspectName, Integer accusedSuspectAge, String correctJustification) {
-        String prompt = """
-                You are a mystery game judge.
-                
-                Correct solution justification:
-                %s
-                
-                Player accused suspect:
-                Name: %s
-                Age: %s
-                
-                Player reason:
-                %s
-                
-                The correct suspect is not stored in a separate database field.
-                Extract the correct suspect from the correct solution justification.
-                
-                Return true only if:
-                - The accused suspect matches the culprit in the correct solution justification.
-                - The player's reason reasonably matches the correct motive and evidence.
-                
-                Reply with ONLY "true" or "false".
-                """.formatted(correctJustification, accusedSuspectName, accusedSuspectAge, playerReason);
+            You are a mystery game judge analyzing a detective team's performance.
+            
+            Correct solution justification:
+            %s
+            
+            Player accused suspect:
+            Name: %s
+            Age: %s
+            
+            Player reason:
+            %s
+            
+            The correct suspect is not stored in a separate database field.
+            Extract the correct suspect from the correct solution justification.
+            
+            Analyze whether the player correctly identified the culprit and provided a reasonable explanation.
+            
+            Respond in this exact JSON format:
+            {
+              "isCorrect": true or false,
+              "result": "You won! Great detective work!" or "You lost! Better luck next time!",
+              "analysis": "2-3 sentences analyzing how well the team played",
+              "focusOn": "1-2 specific areas to improve next time"
+            }
+            Return ONLY the JSON, no extra text.
+            """.formatted(correctJustification, accusedSuspectName, accusedSuspectAge, playerReason);
 
         String response = WebClient.builder()
-                .baseUrl("https://api.openai.com").build().post().uri("/v1/chat/completions").header("Authorization", "Bearer " + openAiApiKey).header("Content-Type", "application/json")
+                .baseUrl("https://api.openai.com").build().post().uri("/v1/chat/completions")
+                .header("Authorization", "Bearer " + openAiApiKey)
+                .header("Content-Type", "application/json")
                 .bodyValue("""
-                        {
-                          "model": "gpt-4o-mini",
-                          "messages": [{"role": "user", "content": "%s"}],
-                          "temperature": 0.0
-                        }
-                        """.formatted(prompt.replace("\"", "\\\"").replace("\n", "\\n")))
+                    {
+                      "model": "gpt-4o-mini",
+                      "messages": [{"role": "user", "content": "%s"}],
+                      "temperature": 0.0
+                    }
+                    """.formatted(prompt.replace("\"", "\\\"").replace("\n", "\\n")))
                 .retrieve().bodyToMono(String.class).block();
 
         try {
             JsonNode root = objectMapper.readTree(response);
-            String result = root.path("choices").get(0).path("message").path("content").asText().trim().toLowerCase();
-            return result.equals("true");
+            return root.path("choices").get(0).path("message").path("content").asText().trim()
+                    .replace("```json", "").replace("```", "").trim();
         } catch (Exception e) {
             throw new ApiException("Failed to evaluate solution: " + e.getMessage());
         }
@@ -274,6 +234,18 @@ public class OpenAiService {
         return defaultTone;
     }
 
+
+    private String getNextDifficulty() {
+        Case lastCase = caseRepository.findFirstByOrderByIdDesc();
+
+        if (lastCase == null)
+            return "EASY";
+
+        return switch (lastCase.getDifficulty()) {
+            case "EASY"   -> "MEDIUM";
+            case "MEDIUM" -> "HARD";
+            default       -> "EASY";
+        };
     public String analyzePlayer(String prompt) {
         String response = WebClient.builder()
                 .baseUrl("https://api.openai.com")
