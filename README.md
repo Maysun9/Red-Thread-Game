@@ -40,14 +40,14 @@ contradictions, confront suspects.
 
 Base URL: `/api/v1/cases`
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/most-lost` | Get the case with the most team losses |
-| GET | `/most-won` | Get the case with the most team wins |
-| GET | `/not-played/{playerId}` | Get published cases the player has not played yet |
-| POST | `/generate/{adminId}` | AI generates a case (EASY → MEDIUM → HARD cycle) saved as DRAFT |
-| PUT | `/publish/{adminId}/{caseId}` | Admin publishes a DRAFT case |
-| PUT | `/draft/{adminId}/{caseId}` | Admin moves a published case back to DRAFT |
+| Method  | Endpoint                      | Description                                                     |
+|---------|-------------------------------|-----------------------------------------------------------------|
+| GET     | `/most-lost`                  | Get the case with the most team losses                          |
+| GET     | `/most-won`                   | Get the case with the most team wins                            |
+| GET     | `/not-played/{playerId}`      | Get published cases the player has not played yet               |
+| POST    | `/generate/{adminId}`         | AI generates a case (EASY → MEDIUM → HARD cycle) saved as DRAFT |
+| PUT     | `/publish/{adminId}/{caseId}` | Admin publishes a DRAFT case                                    |
+| PUT     | `/draft/{adminId}/{caseId}`   | Admin moves a published case back to DRAFT                      |
 
 ---
 
