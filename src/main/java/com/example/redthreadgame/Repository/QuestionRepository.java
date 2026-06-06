@@ -9,9 +9,5 @@ import java.util.List;
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Integer> {
 
-    Question findQuestionById(Integer id);
     List<Question> findAllByGameSessionId(Integer gameSessionId);
-    List<Question> findAllByPlayerId(Integer playerId);
-    List<Question> findAllByWitnessId(Integer witnessId);
-    List<Question> findAllBySuspectId(Integer suspectId);
 }

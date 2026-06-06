@@ -72,28 +72,6 @@ public class SolutionProposalService {
         solutionProposalRepository.save(proposal);
     }// Creates a pending solution proposal after validating the session, player, and accused suspect.
 
-        for (SolutionProposal s : solutionProposalRepository.findAllByPlayerId(playerId)) {
-            proposals.add(modelMapper.map(s, SolutionProposalOut.class));
-        }
-
-        return proposals;
-    }
-
-    public void markProposalCorrect(Integer proposalId) {
-        SolutionProposal proposal = solutionProposalRepository.findById(proposalId)
-                .orElseThrow(() -> new ApiException("Solution proposal not found"));
-
-        proposal.setStatus(SolutionProposalStatusType.CORRECT);
-        solutionProposalRepository.save(proposal);
-    }
-
-    public void markProposalWrong(Integer proposalId) {
-        SolutionProposal proposal = solutionProposalRepository.findById(proposalId)
-                .orElseThrow(() -> new ApiException("Solution proposal not found"));
-
-        proposal.setStatus(SolutionProposalStatusType.WRONG);
-        solutionProposalRepository.save(proposal);
-    }
     public String evaluateProposal(Integer proposalId) {
         SolutionProposal proposal = solutionProposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ApiException("Solution proposal not found"));

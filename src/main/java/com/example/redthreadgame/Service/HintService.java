@@ -1,7 +1,6 @@
 package com.example.redthreadgame.Service;
 
 import com.example.redthreadgame.Api.ApiException;
-import com.example.redthreadgame.DTO.IN.HintIn;
 import com.example.redthreadgame.DTO.OUT.HintOut;
 import com.example.redthreadgame.Enums.GameSessionStatusType;
 import com.example.redthreadgame.Enums.SessionPlayerStatus;

@@ -12,9 +12,4 @@ public interface CaseRepository extends JpaRepository<Case, Integer> {
     Case findCaseById(Integer id);
     List<Case> findCasesByStatus(String status);
     Case findFirstByOrderByIdDesc();
-    List<Case> findCasesByStatusAndDifficulty(String status, String difficulty);
-
-
-    // List<Case> findCasesByAdminId(Integer adminId);
-
 }

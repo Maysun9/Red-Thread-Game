@@ -79,8 +79,9 @@ public class ProposalVoteService {
         proposalVoteRepository.save(proposalVote);
         solutionProposalRepository.save(proposal);
 
+        String analysisResult;
         if (proposal.getStatus() == SolutionProposalStatusType.ACCEPTED_BY_PLAYERS)
-            solutionProposalService.evaluateProposal(proposal.getId());
+             analysisResult = solutionProposalService.evaluateProposal(proposal.getId());
     }// Save player vote, updates proposal count, automatically evaluate the proposal when enough players accept
 
     private ProposalVoteType parseVote(String vote) {

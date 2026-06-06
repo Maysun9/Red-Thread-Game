@@ -242,10 +242,13 @@ public class OpenAiService {
             return "EASY";
 
         return switch (lastCase.getDifficulty()) {
-            case "EASY"   -> "MEDIUM";
+            case "EASY" -> "MEDIUM";
             case "MEDIUM" -> "HARD";
-            default       -> "EASY";
+            default -> "EASY";
         };
+    }
+
+
     public String analyzePlayer(String prompt) {
         String response = WebClient.builder()
                 .baseUrl("https://api.openai.com")

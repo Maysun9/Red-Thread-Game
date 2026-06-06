@@ -9,8 +9,6 @@ import java.util.List;
 @Repository
 public interface ProposalVoteRepository extends JpaRepository<ProposalVote, Integer> {
 
-    ProposalVote findProposalVoteById(Integer id);
     ProposalVote findProposalVoteBySolutionProposalIdAndPlayerId(Integer proposalId, Integer playerId);
     List<ProposalVote> findAllBySolutionProposalId(Integer proposalId);
-    List<ProposalVote> findAllByPlayerId(Integer playerId);
 }

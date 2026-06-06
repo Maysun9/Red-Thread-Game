@@ -10,6 +10,5 @@ import java.util.List;
 public interface SuspectRepository extends JpaRepository<Suspect, Integer> {
 
     Suspect findSuspectById(Integer id);
-    //
     List<Suspect> findSuspectsBySuspectCaseId(Integer caseId);
     }

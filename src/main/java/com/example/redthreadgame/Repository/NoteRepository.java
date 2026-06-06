@@ -8,5 +8,4 @@ import java.util.List;
 public interface NoteRepository extends JpaRepository<Note, Integer> {
 
     List<Note> findAllByGameSessionId(Integer gameSessionId);
-    List<Note> findAllByPlayerId(Integer playerId);
 }
