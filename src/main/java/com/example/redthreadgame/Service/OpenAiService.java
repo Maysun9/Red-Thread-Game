@@ -21,8 +21,6 @@ public class OpenAiService {
     private final EvidenceRepository evidenceRepository;
     private final CaseSolutionRepository caseSolutionRepository;
     private final AdminService adminService;
-    private final GameSessionRepository gameSessionRepository;
-
 
     @Value("${openai.api.key}")
     private String openAiApiKey;
@@ -227,7 +225,7 @@ public class OpenAiService {
         return defaultTone;
     }
 
-    //
+
     private String getNextDifficulty() {
         Case lastCase = caseRepository.findFirstByOrderByIdDesc();
 
