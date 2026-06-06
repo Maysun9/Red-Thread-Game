@@ -1,13 +1,14 @@
 package com.example.redthreadgame.Service;
 
 import com.example.redthreadgame.Api.ApiException;
-import com.example.redthreadgame.DTO.IN.QuestionIn;
 import com.example.redthreadgame.DTO.IN.SuspectIn;
-import com.example.redthreadgame.DTO.OUT.VoiceAnswerOut;
 import com.example.redthreadgame.DTO.OUT.SuspectOut;
-import com.example.redthreadgame.Model.Case;
-import com.example.redthreadgame.Model.Suspect;
+import com.example.redthreadgame.Enums.GameSessionStatusType;
+import com.example.redthreadgame.Enums.QuestionTargetType;
+import com.example.redthreadgame.Model.*;
+import com.example.redthreadgame.Repository.GameSessionRepository;
 import com.example.redthreadgame.Repository.SuspectRepository;
+import com.example.redthreadgame.Repository.WitnessRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -22,17 +23,18 @@ public class SuspectService {
     private final SuspectRepository suspectRepository;
     private final CaseService caseService;
     private final OpenAiService openAiService;
-    private final ElevenLabsService elevenLabsService;
+    private final GameSessionRepository gameSessionRepository;
+    private final WitnessRepository witnessRepository;
 
-  public List<SuspectOut> getAllSuspects() {
-      List<SuspectOut> suspects = new ArrayList<>();
-      for (Suspect s : suspectRepository.findAll()) {
-          suspects.add(modelMapper.map(s, SuspectOut.class));
-      }
-      return suspects;
-  }
+    public List<SuspectOut> getAllSuspects() {
+        List<SuspectOut> suspects = new ArrayList<>();
+        for (Suspect s : suspectRepository.findAll()) {
+            suspects.add(modelMapper.map(s, SuspectOut.class));
+        }
+        return suspects;
+    }
     public void addSuspect(Integer caseId, SuspectIn dto) {
-         Case c = caseService.checkCase(caseId);
+        Case c = caseService.checkCase(caseId);
         Suspect suspect = modelMapper.map(dto, Suspect.class);
         suspect.setSuspectCase(c);
 
@@ -61,24 +63,89 @@ public class SuspectService {
         return suspects;
     }
 
-    //endpoint by mohammed
-    public VoiceAnswerOut askSuspect(Integer suspectId, QuestionIn dto) {
+    public String confrontSuspectWithWitness(Integer suspectId, Integer witnessId, Integer gameSessionId) {
+        // check Game Session
+        GameSession gameSession = gameSessionRepository.findGameSessionById(gameSessionId);
+        if (gameSession == null) throw new ApiException("Game session not found");
+        if (gameSession.getStatus() != GameSessionStatusType.IN_PROGRESS)
+            throw new ApiException("Game session is not in progress");
+
+        // check suspect and witness
         Suspect suspect = checkSuspect(suspectId);
+        Witness witness = witnessRepository.findWitnessById(witnessId);
+        if (witness == null) throw new ApiException("Witness not found");
 
-        String prompt = "Suspect name: " + suspect.getName()
-                + "\nSuspect age: " + suspect.getAge()
-                + "\nSuspect gender: " + suspect.getGender()
-                + "\nSuspect voice tone: " + suspect.getVoiceTone()
-                + "\nRules: Answer in English only. Match the suspect voice tone naturally. Do not include stage directions, brackets, emotion labels, or sound effects."
-                + "\nPlayer question: " + dto.getQuestionText();
+        // check they are in same case
+        if (!suspect.getSuspectCase().getId().equals(gameSession.getSessionCase().getId()))
+            throw new ApiException("Suspect does not belong to this case");
+        if (!witness.getWitnessCase().getId().equals(gameSession.getSessionCase().getId()))
+            throw new ApiException("Witness does not belong to this case");
 
-        String answer = openAiService.generateAnswer(prompt);
-        if (answer == null || answer.isBlank()) {
-            answer = "I do not have anything else to say right now.";
+        String prompt = """
+        You are directing a tense confrontation scene in a detective mystery game.
+        
+        Case scenario: %s
+        
+        Witness: %s
+        Witness statement: %s
+        
+        Suspect: %s
+        Suspect age: %s
+        
+        Create a short dramatic dialogue confrontation between them.
+        The witness presses the suspect with what they saw.
+        The suspect defends themselves naturally based on their voice tone: %s
+        Do NOT reveal who is guilty.
+        Keep it tense, realistic, and useful for the investigation.
+        
+        Respond in this exact JSON format:
+        {
+          "dialogue": [
+            {"speaker": "Witness - name", "line": "what they say"},
+            {"speaker": "Suspect - name", "line": "what they say"},
+            {"speaker": "Witness - name", "line": "what they say"},
+            {"speaker": "Suspect - name", "line": "what they say"}
+          ],
+          "tension": "HIGH or MEDIUM or LOW"
+        }
+        Return ONLY the JSON, no extra text.
+        """.formatted(
+                gameSession.getSessionCase().getScenario(),
+                witness.getName(),
+                witness.getStatement(),
+                suspect.getName(),
+                suspect.getAge(),
+                suspect.getVoiceTone()
+        );
+
+        String result = openAiService.generateAnswer(prompt);
+        return result.trim().replace("```json", "").replace("```", "").trim();
+    }
+    public List<SuspectOut> getNotQuestionedSuspects(Integer gameSessionId) {
+        GameSession gameSession = gameSessionRepository.findGameSessionById(gameSessionId);
+        if (gameSession == null) throw new ApiException("Game session not found");
+        //allSuspects
+        List<Suspect> allSuspects = suspectRepository.findSuspectsBySuspectCaseId(gameSession.getSessionCase().getId());
+        //Suspects that got questioned
+        List<Integer> questionedIds = new ArrayList<>();
+        for (Question q : gameSession.getQuestions()) {
+            if (q.getTargetType() == QuestionTargetType.SUSPECT && q.getSuspect() != null) {
+                questionedIds.add(q.getSuspect().getId());
+            }
         }
 
-        String audioFileName = elevenLabsService.generateVoice(answer, suspect.getGender(), suspect.getVoiceTone());
-        return new VoiceAnswerOut(answer, audioFileName);
+        //delete suspect that got questioned
+        List<SuspectOut> notQuestioned = new ArrayList<>();
+        for (Suspect s : allSuspects) {
+            if (!questionedIds.contains(s.getId())) {
+                notQuestioned.add(modelMapper.map(s, SuspectOut.class));
+            }
+        }
+
+        if (notQuestioned.isEmpty())
+            throw new ApiException("All suspects have been questioned");
+
+        return notQuestioned;
     }
 
     //helper method

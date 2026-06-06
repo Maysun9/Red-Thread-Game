@@ -12,6 +12,8 @@ import com.example.redthreadgame.Model.SessionPlayer;
 import com.example.redthreadgame.Model.SolutionProposal;
 import com.example.redthreadgame.Model.Suspect;
 import com.example.redthreadgame.Repository.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -68,50 +70,9 @@ public class SolutionProposalService {
         proposal.setSuspect(suspect);
 
         solutionProposalRepository.save(proposal);
-    }
+    }// Creates a pending solution proposal after validating the session, player, and accused suspect.
 
-    public void acceptProposal(Integer proposalId) {
-        throw new ApiException("Use proposal vote endpoint instead");
-    }
-
-    public void rejectProposal(Integer proposalId) {
-        throw new ApiException("Use proposal vote endpoint instead");
-    }
-
-    public void changeStatus(Integer proposalId, String status) {
-        SolutionProposal proposal = solutionProposalRepository.findById(proposalId)
-                .orElseThrow(() -> new ApiException("Solution proposal not found"));
-
-        proposal.setStatus(SolutionProposalStatusType.valueOf(status));
-        solutionProposalRepository.save(proposal);
-    }
-
-    public List<SolutionProposalOut> getProposalsByPlayer(Integer playerId) {
-        List<SolutionProposalOut> proposals = new ArrayList<>();
-
-        for (SolutionProposal s : solutionProposalRepository.findAllByPlayerId(playerId)) {
-            proposals.add(modelMapper.map(s, SolutionProposalOut.class));
-        }
-
-        return proposals;
-    }
-
-    public void markProposalCorrect(Integer proposalId) {
-        SolutionProposal proposal = solutionProposalRepository.findById(proposalId)
-                .orElseThrow(() -> new ApiException("Solution proposal not found"));
-
-        proposal.setStatus(SolutionProposalStatusType.CORRECT);
-        solutionProposalRepository.save(proposal);
-    }
-
-    public void markProposalWrong(Integer proposalId) {
-        SolutionProposal proposal = solutionProposalRepository.findById(proposalId)
-                .orElseThrow(() -> new ApiException("Solution proposal not found"));
-
-        proposal.setStatus(SolutionProposalStatusType.WRONG);
-        solutionProposalRepository.save(proposal);
-    }
-    public Integer evaluateProposal(Integer proposalId) {
+    public String evaluateProposal(Integer proposalId) {
         SolutionProposal proposal = solutionProposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ApiException("Solution proposal not found"));
 
@@ -137,21 +98,30 @@ public class SolutionProposalService {
         if (joinedPlayers.isEmpty())
             throw new ApiException("No joined players found in this game session");
 
-        Boolean isCorrect = openAiService.evaluateSolution(
+        String analysisResult = openAiService.evaluateSolution(
                 proposal.getReason(),
                 proposal.getSuspect().getName(),
                 proposal.getSuspect().getAge(),
                 solution.getJustification()
         );
+
+        boolean isCorrect;
+        try {
+            JsonNode analysisJson = new ObjectMapper().readTree(analysisResult);
+            isCorrect = analysisJson.path("isCorrect").asBoolean();
+        } catch (Exception e) {
+            throw new ApiException("Failed to parse AI response");
+        }
+
         if (!isCorrect) {
             proposal.setStatus(SolutionProposalStatusType.WRONG);
             gameSession.setScore(0);
-            gameSession.setStatus(GameSessionStatusType.COMPLETED);
+            gameSession.setStatus(GameSessionStatusType.LOST);
             gameSession.setEndedAt(LocalDateTime.now());
             gameSessionRepository.save(gameSession);
             solutionProposalRepository.save(proposal);
             notifyPlayersWrongSolution(gameSession, proposal, joinedPlayers);
-            return 0;
+            return analysisResult;
         }
 
         Integer totalScore = hintService.calculateTotalScore(gameSession.getId());
@@ -159,7 +129,7 @@ public class SolutionProposalService {
 
         proposal.setStatus(SolutionProposalStatusType.CORRECT);
         gameSession.setScore(totalScore);
-        gameSession.setStatus(GameSessionStatusType.COMPLETED);
+        gameSession.setStatus(GameSessionStatusType.WON);
         gameSession.setEndedAt(LocalDateTime.now());
 
         for (SessionPlayer s : joinedPlayers) {
@@ -171,7 +141,7 @@ public class SolutionProposalService {
         gameSessionRepository.save(gameSession);
         solutionProposalRepository.save(proposal);
         notifyPlayersCorrectSolution(gameSession, proposal, totalScore, playerScore, joinedPlayers);
-        return totalScore;
+        return analysisResult;
     }
 
     private void checkCanPlay(GameSession gameSession, Player player) {
@@ -186,38 +156,73 @@ public class SolutionProposalService {
     private void notifyPlayersCorrectSolution(GameSession gameSession, SolutionProposal proposal, Integer totalScore, Integer playerScore, List<SessionPlayer> joinedPlayers) {
         for (SessionPlayer s : joinedPlayers) {
             Player player = s.getPlayer();
+
             emailService.send(
                     player.getEmail(),
-                    "Red Thread Game Result - Case Solved",
-                    "Dear " + player.getName() + ",\n\n" +
-                            "Your team solved the case successfully.\n\n" +
-                            "Case: " + gameSession.getSessionCase().getTitle() + "\n" +
-                            "Accused suspect: " + proposal.getSuspect().getName() + "\n" +
-                            "Final session score: " + totalScore + "\n" +
-                            "Your earned score: " + playerScore + "\n" +
-                            "Ended at: " + gameSession.getEndedAt() + "\n\n" +
-                            "Great detective work.\n\n" +
-                            "Red Thread Game Team"
+                    "🏆 Case Closed Successfully!",
+                    "🎉 Congratulations Detective " + player.getName() + "! 🎉\n\n" +
+                            "The case has been solved successfully! 🕵️\n\n" +
+                            "📂 Case: " + gameSession.getSessionCase().getTitle() + "\n" +
+                            "😈 Culprit Identified: " + proposal.getSuspect().getName() + "\n" +
+                            "⭐ Team Score: " + totalScore + "\n" +
+                            "🏅 Your Score: " + playerScore + "\n" +
+                            "⏰ Investigation Closed: " + gameSession.getEndedAt() + "\n\n" +
+                            "🔍 Excellent detective work!\n" +
+                            "🧩 Every clue mattered.\n" +
+                            "🎯 Justice has been served.\n\n" +
+                            "See you in the next mystery! 🚨\n\n" +
+                            "🧵 Red Thread Team"
             );
         }
-    }
+    }// Sends the win result and each player's earned score to all joined players.
 
     private void notifyPlayersWrongSolution(GameSession gameSession, SolutionProposal proposal, List<SessionPlayer> joinedPlayers) {
         for (SessionPlayer s : joinedPlayers) {
             Player player = s.getPlayer();
+
             emailService.send(
                     player.getEmail(),
-                    "Red Thread Game Result - Case Failed",
-                    "Dear " + player.getName() + ",\n\n" +
-                            "Your team submitted a wrong solution.\n\n" +
-                            "Case: " + gameSession.getSessionCase().getTitle() + "\n" +
-                            "Accused suspect: " + proposal.getSuspect().getName() + "\n" +
-                            "Final session score: 0\n" +
-                            "Your earned score: 0\n" +
-                            "Ended at: " + gameSession.getEndedAt() + "\n\n" +
-                            "Better luck next investigation.\n\n" +
-                            "Red Thread Game Team"
+                    "🚨 Investigation Failed",
+                    "Detective " + player.getName() + ",\n\n" +
+                            "❌ Case Status: FAILED\n\n" +
+                            "📂 Case File: " + gameSession.getSessionCase().getTitle() + "\n" +
+                            "🎭 Suspect Accused: " + proposal.getSuspect().getName() + "\n" +
+                            "🏆 Team Score: 0\n" +
+                            "⭐ Your Score: 0\n\n" +
+                            "The evidence didn't lead to the correct suspect.\n" +
+                            "😈 The real culprit has escaped justice.\n\n" +
+                            "🧠 Review the clues more carefully next time.\n" +
+                            "🔍 Every detail matters in an investigation.\n\n" +
+                            "Better luck on your next case, Detective! 🕵️‍♀️\n\n" +
+                            "🧵 Red Thread Investigation Department"
             );
         }
-    }
+    }// Sends the loss result to all joined players when the proposed solution is incorrect.
+
+    public SolutionProposalOut getActiveProposalBySession(Integer gameSessionId) {
+        gameSessionRepository.findById(gameSessionId)
+                .orElseThrow(() -> new ApiException("Game session not found"));
+
+        for (SolutionProposal s : solutionProposalRepository.findAllByGameSessionId(gameSessionId)) {
+            if (s.getStatus() == SolutionProposalStatusType.PENDING) {
+                return modelMapper.map(s, SolutionProposalOut.class);
+            }
+        }
+
+        throw new ApiException("No active proposal found");
+    }// Find the current pending proposal that players still need to vote on
+
+    public SolutionProposalOut getLastProposalResultBySession(Integer gameSessionId) {
+        gameSessionRepository.findById(gameSessionId)
+                .orElseThrow(() -> new ApiException("Game session not found"));
+
+        List<SolutionProposal> proposals = solutionProposalRepository.findAllByGameSessionId(gameSessionId);
+
+        if (proposals.isEmpty())
+            throw new ApiException("No proposals found");
+
+        proposals.sort((p1, p2) -> p2.getId().compareTo(p1.getId()));
+
+        return modelMapper.map(proposals.get(0), SolutionProposalOut.class);
+    }// Return the latest proposal result for reviewing the final or most recent team accusation
 }
