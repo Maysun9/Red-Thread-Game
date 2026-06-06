@@ -58,4 +58,9 @@ public class CaseController {
         openAiService.generateCase(adminId, dto.getPassword());
         return ResponseEntity.status(200).body(new ApiResponse("Case generated successfully as DRAFT"));
     }
+
+    @GetMapping("/published/{difficulty}")
+    public ResponseEntity<?> getPublishedCasesByDifficulty(@PathVariable String difficulty) {
+        return ResponseEntity.ok(caseService.getPublishedCasesByDifficulty(difficulty));
+    }
 }

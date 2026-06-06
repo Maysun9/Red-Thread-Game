@@ -75,6 +75,15 @@ public List<CaseOut> getPublishedCases() {
     }
     return cases;
 }
+
+//sort cases by difficulty
+public List<CaseOut> getPublishedCasesByDifficulty(String difficulty) {
+    List<CaseOut> cases = new ArrayList<>();
+    for (Case c : caseRepository.findCasesByStatusAndDifficulty("PUBLISHED", difficulty.toUpperCase())) {
+        cases.add(modelMapper.map(c, CaseOut.class));
+    }
+    return cases;
+}
 //helper method
     public Case checkCase(Integer id) {
         Case c = caseRepository.findCaseById(id);

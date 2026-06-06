@@ -43,7 +43,8 @@ public class OpenAiService {
                         {
                           "title": "case title",
                           "scenario": "detailed case scenario 3-5 sentences",
-                          "difficulty": "EASY or MEDIUM or HARD",
+                        "difficulty": "%s"
+                
                         "witnesses": [
                        {"name": "witness name", "statement": "witness statement", "reliabilityScore": score between 1 and 100 based on witness credibility, "gender": "MALE or FEMALE", "voiceTone": "CALM or NERVOUS or DEFENSIVE or SUSPICIOUS or SAD or CONFIDENT"},
                        {"name": "witness name", "statement": "witness statement", "reliabilityScore": score between 1 and 100 based on witness credibility, "gender": "MALE or FEMALE", "voiceTone": "CALM or NERVOUS or DEFENSIVE or SUSPICIOUS or SAD or CONFIDENT"},
@@ -91,7 +92,7 @@ public class OpenAiService {
             Case newCase = new Case();
             newCase.setTitle(caseJson.path("title").asText());
             newCase.setScenario(caseJson.path("scenario").asText());
-            newCase.setDifficulty(caseJson.path("difficulty").asText());
+            newCase.setDifficulty(getNextDifficulty());
             newCase.setStatus("DRAFT");
             caseRepository.save(newCase);
 
@@ -154,52 +155,6 @@ public class OpenAiService {
         }
     }
 
-//check correct suspect
-    public String checkCorrectSuspect(Integer gameSessionId, Integer suspectId, String playerReason) {
-        GameSession gameSession = gameSessionRepository.findGameSessionById(gameSessionId);
-        if (gameSession == null)
-            throw new ApiException("Game session not found");
-
-        CaseSolution caseSolution = gameSession.getSessionCase().getCaseSolution();
-        if (caseSolution == null)
-            throw new ApiException("Case solution not found");
-
-        Suspect suspect = suspectRepository.findSuspectById(suspectId);
-        if (suspect == null)
-            throw new ApiException("Suspect not found");
-
-        if (!suspect.getSuspectCase().getId().equals(gameSession.getSessionCase().getId()))
-            throw new ApiException("Suspect does not belong to this case");
-
-        String prompt = """
-                You are a mystery game judge.
-                
-                Correct solution: %s
-                
-                Player accused: %s
-                Player reason: %s
-                
-                Does the player correctly identify the culprit and provide a reasonable explanation?
-                Reply with ONLY one of these two:
-                "You won! Great detective work!"
-                "You lost! Better luck next time!"
-                """.formatted(caseSolution.getJustification(), suspect.getName(), playerReason);
-
-        String response = WebClient.builder().baseUrl("https://api.openai.com").build().post().uri("/v1/chat/completions").header("Authorization", "Bearer " + openAiApiKey).header("Content-Type", "application/json").bodyValue("""
-                        {
-                          "model": "gpt-4o-mini",
-                          "messages": [{"role": "user", "content": "%s"}],
-                          "temperature": 0.0
-                        }
-                        """.formatted(prompt.replace("\"", "\\\"").replace("\n", "\\n"))).retrieve().bodyToMono(String.class).block();
-
-        try {
-            JsonNode root = objectMapper.readTree(response);
-            return root.path("choices").get(0).path("message").path("content").asText().trim().replace("\"", "");
-        } catch (Exception e) {
-            throw new ApiException("Failed to evaluate solution: " + e.getMessage());
-        }
-    }
     //evaluation solution
     public boolean evaluateSolution(String playerReason, String accusedSuspectName, Integer accusedSuspectAge, String correctJustification) {
         String prompt = """
@@ -270,5 +225,19 @@ public class OpenAiService {
             return tone;
 
         return defaultTone;
+    }
+
+    //
+    private String getNextDifficulty() {
+        Case lastCase = caseRepository.findFirstByOrderByIdDesc();
+
+        if (lastCase == null)
+            return "EASY";
+
+        return switch (lastCase.getDifficulty()) {
+            case "EASY"   -> "MEDIUM";
+            case "MEDIUM" -> "HARD";
+            default       -> "EASY";
+        };
     }
     }
