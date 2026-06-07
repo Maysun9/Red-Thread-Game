@@ -68,8 +68,9 @@ Base URL: `/api/v1/witnesses`
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/not-questioned/{gameSessionId}` | Get witnesses not yet questioned in this session |
-| POST | `/confront/{witnessId1}/{witnessId2}/{gameSessionId}` | AI finds agreements and contradictions between two witness statements |
 | POST | `/retract/{witnessId}/{gameSessionId}` | Witness dramatically retracts their statement under pressure |
+| POST | `/confront/{witnessId1}/{witnessId2}/{gameSessionId}` | AI finds agreements and contradictions between two witness statements |
+
 
 ---
 
